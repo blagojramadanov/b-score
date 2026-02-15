@@ -1,5 +1,12 @@
-import { getHeaderHtml } from "./header.js";
-import "./styles/header.scss";
-import "./styles/styles.scss";
+import "./styles/home.scss";
+import "./styles/about.scss";
 
-getHeaderHtml();
+import { getHomeHtml } from "./home.js";
+import { getAboutHtml } from "./about.js";
+
+const app = document.getElementById("app");
+
+app.innerHTML = `
+  ${getHomeHtml()}
+  ${getAboutHtml()}
+`;

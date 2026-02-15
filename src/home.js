@@ -1,4 +1,4 @@
-export function getHeaderHtml() {
+export function getHomeHtml() {
   return `
     <header>
       <nav class="navbar">
@@ -11,18 +11,12 @@ export function getHeaderHtml() {
         </ul>
       </nav>
     </header>
-  `;
-}
 
-document.addEventListener("DOMContentLoaded", () => {
-  const app = document.getElementById("app");
-  app.innerHTML = `
-    ${getHeaderHtml()}
     <main>
       <section class="hero">
         <div class="hero-content">
           <div class="hero-image">
-            <img src="./images/players.png" alt="Players">
+            <img src="public/images/players.png" alt="Home">
           </div>
           <div class="hero-text">
             <h1>WATCH YOUR TEAM'S SCORE LIVE NOW!</h1>
@@ -31,6 +25,8 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         </div>
       </section>
+
+      <div class="section-divider"></div>
     </main>
   `;
-});
+}
