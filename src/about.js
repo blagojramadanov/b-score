@@ -29,6 +29,7 @@ export function getAboutHtml() {
           </div>
           <div class="card-content">
             <button class="card-button">LIVE RESULT</button>
+            <br></br>
             <p>Now to the results.</p>
           </div>
         </div>
