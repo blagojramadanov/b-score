@@ -7,7 +7,7 @@ const BASE = IS_DEV
 const KEY = "8243ec99557b450a9c932eca7d54fa06";
 const RATE_DELAY = 6000;
 const CACHE_TTL = 60 * 60 * 1000;
-const CACHE_VER = "v6";
+const CACHE_VER = "v7";
 
 (function bustOldCache() {
   try {
@@ -119,7 +119,11 @@ async function call(path) {
     clearTimeout(t);
 
     if (r.status === 429) {
-      console.warn("[API] 429 rate limit hit — data will load after cooldown");
+      console.warn("[API] 429 rate limit");
+      return null;
+    }
+    if (r.status === 522) {
+      console.warn("[API] 522 Worker cannot reach API");
       return null;
     }
     if (!r.ok) {
