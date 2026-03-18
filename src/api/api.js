@@ -1,13 +1,11 @@
 const IS_DEV =
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1";
-const BASE = IS_DEV
-  ? "/api"
-  : "https://tiny-unit-0cec.blaze-ramadanov.workers.dev";
+const BASE = IS_DEV ? "/api" : "https://api.football-data.org/v4";
 const KEY = "8243ec99557b450a9c932eca7d54fa06";
-const RATE_DELAY = 8000;
+const RATE_DELAY = 6000;
 const CACHE_TTL = 60 * 60 * 1000;
-const CACHE_VER = "v4";
+const CACHE_VER = "v5";
 
 (function bustOldCache() {
   try {
@@ -99,7 +97,7 @@ async function call(path) {
   lastCallTime = Date.now();
 
   const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 10000);
+  const t = setTimeout(() => ctrl.abort(), 25000);
   try {
     const isMatch = path.startsWith("/matches/");
     const r = await fetch(`${BASE}${path}`, {
