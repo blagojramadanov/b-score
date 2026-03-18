@@ -1,11 +1,13 @@
 const IS_DEV =
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1";
-const BASE = IS_DEV ? "/api" : "https://api.football-data.org/v4";
+const BASE = IS_DEV
+  ? "/api"
+  : "https://tiny-unit-0cec.blaze-ramadanov.workers.dev";
 const KEY = "8243ec99557b450a9c932eca7d54fa06";
 const RATE_DELAY = 6000;
 const CACHE_TTL = 60 * 60 * 1000;
-const CACHE_VER = "v5";
+const CACHE_VER = "v6";
 
 (function bustOldCache() {
   try {
