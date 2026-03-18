@@ -1,96 +1,29 @@
-export function getAboutHtml() {
-  return `
+export function mountAbout(container) {
+  container.innerHTML = `
 <section class="about">
-
   <div class="about__hero">
     <h1 class="about__title">What is <em>B-Score</em>?</h1>
-    <p class="about__lead">
-      B-Score is a fast, clean football scores app focused exclusively on
-      Europe's five biggest leagues. No ads, no filler — just the data you
-      need, the moment you need it.
-    </p>
+    <p class="about__lead">Full football data for Europe's top 5 leagues. Match history, lineups, scorers, cards and formations — every match of the 2025/26 season.</p>
   </div>
-
   <div class="about__features">
-    <div class="about-card">
-      <div class="about-card__icon">⚡</div>
-      <h3>Real-Time Scores</h3>
-      <p>
-        Match data refreshes automatically every 60 seconds on the home and
-        live pages — 30 seconds when a match is actively in play.
-      </p>
-    </div>
-    <div class="about-card">
-      <div class="about-card__icon">🏆</div>
-      <h3>Top 5 Leagues Only</h3>
-      <p>
-        Premier League · La Liga · Serie A · Bundesliga · Ligue 1.
-        No clutter from minor competitions — just the matches people care about.
-      </p>
-    </div>
-    <div class="about-card">
-      <div class="about-card__icon">↕</div>
-      <h3>Drag-and-Drop Panels</h3>
-      <p>
-        On the home screen, drag league panels into any order you like.
-        Your preference is saved locally so it persists between visits.
-      </p>
-    </div>
-    <div class="about-card">
-      <div class="about-card__icon">📊</div>
-      <h3>Live Standings</h3>
-      <p>
-        Full league tables with form guides, goal difference and zone
-        indicators for Champions League, Europa League and relegation spots.
-      </p>
-    </div>
-    <div class="about-card">
-      <div class="about-card__icon">📅</div>
-      <h3>Date Navigation</h3>
-      <p>
-        Browse results from the past week or fixtures a week ahead using
-        the date strip at the top of the scores page.
-      </p>
-    </div>
-    <div class="about-card">
-      <div class="about-card__icon">🔴</div>
-      <h3>Dedicated Live Page</h3>
-      <p>
-        The Live tab shows every in-progress match across all five leagues
-        at a glance, with a live minute bar for each game.
-      </p>
-    </div>
+    <div class="about-card"><div class="about-card__icon">📋</div><h3>Match Lineups</h3><p>Full starting XI with formation diagram, player positions and the complete bench for every match.</p></div>
+    <div class="about-card"><div class="about-card__icon">⚽</div><h3>Goals & Scorers</h3><p>Every goal — who scored it, at what minute, penalty or open play, and who assisted.</p></div>
+    <div class="about-card"><div class="about-card__icon">🟨</div><h3>Cards & Events</h3><p>Yellow cards, red cards, second yellows, substitutions and VAR decisions for every match.</p></div>
+    <div class="about-card"><div class="about-card__icon">📊</div><h3>Match Statistics</h3><p>Shots, possession, corners, fouls, offsides and more — visualised with comparison bars.</p></div>
+    <div class="about-card"><div class="about-card__icon">🏆</div><h3>Full Standings</h3><p>Live league tables with wins, draws, losses, goal difference, form guide and zone indicators.</p></div>
+    <div class="about-card"><div class="about-card__icon">👤</div><h3>Team Profiles</h3><p>Season stats, stadium info, home/away record and full match history for every club.</p></div>
   </div>
-
-  <div class="about__data">
-    <h2>Data Source</h2>
-    <p>
-      All football data is provided by
-      <a href="https://www.api-football.com" target="_blank" rel="noopener">API-Football</a>
-      (RapidAPI). The free tier allows 100 requests per day — B-Score batches
-      calls efficiently to stay within this limit under normal usage.
-    </p>
-    <p>
-      If the app shows demo data, the daily quota has likely been reached.
-      Upgrade to a paid API plan or come back tomorrow.
-    </p>
-  </div>
-
-  <div class="about__tech">
-    <h2>Built With</h2>
-    <ul class="tech-list">
-      <li><strong>Vite</strong> — lightning-fast dev server &amp; bundler</li>
-      <li><strong>Vanilla JavaScript</strong> — no framework dependencies</li>
-      <li><strong>SCSS</strong> — modular, variable-driven styles</li>
-      <li><strong>API-Football v3</strong> — live football data</li>
-      <li><strong>HTML5 Drag-and-Drop API</strong> — native panel reordering</li>
+  <div class="about__info">
+    <h2>The 5 Leagues</h2>
+    <ul class="leagues-list">
+      <li>🏴󠁧󠁢󠁥󠁮󠁧󠁿 <strong>Premier League</strong> — England's top flight, 20 clubs</li>
+      <li>🇪🇸 <strong>La Liga</strong> — Spain's top flight, 20 clubs</li>
+      <li>🇮🇹 <strong>Serie A</strong> — Italy's top flight, 20 clubs</li>
+      <li>🇩🇪 <strong>Bundesliga</strong> — Germany's top flight, 18 clubs</li>
+      <li>🇫🇷 <strong>Ligue 1</strong> — France's top flight, 18 clubs</li>
     </ul>
+    <h2>Data</h2>
+    <p>All data is provided by <a href="https://www.api-football.com" target="_blank" rel="noopener">API-Football</a>. The free tier covers 100 requests/day which is enough for browsing. Season shown: 2025/26.</p>
   </div>
-
-</section>
-`;
-}
-
-export function mountAbout(container) {
-  container.innerHTML = getAboutHtml();
+</section>`;
 }

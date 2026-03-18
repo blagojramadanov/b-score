@@ -1,162 +1,181 @@
-const BASE_URL = "https://v3.football.api-sports.io";
-const API_KEY = "ba6b3aedb4932b10a34022851ae731e0";
-const SEASON = 2024;
-const TIMEOUT = 10000;
+const BASE = "/api";
+const KEY = "8243ec99557b450a9c932eca7d54fa06";
+const RATE_DELAY = 8000;
+const CACHE_TTL = 60 * 60 * 1000;
+const CACHE_VER = "v4";
 
-// Top-5 league IDs (API-Football)
+(function bustOldCache() {
+  try {
+    if (localStorage.getItem("bscore_ver") !== CACHE_VER) {
+      Object.keys(localStorage).forEach((k) => localStorage.removeItem(k));
+      localStorage.setItem("bscore_ver", CACHE_VER);
+    }
+  } catch {}
+})();
+
 export const LEAGUES = {
-  39: { name: "Premier League", country: "England", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
-  140: { name: "La Liga", country: "Spain", flag: "🇪🇸" },
-  135: { name: "Serie A", country: "Italy", flag: "🇮🇹" },
-  78: { name: "Bundesliga", country: "Germany", flag: "🇩🇪" },
-  61: { name: "Ligue 1", country: "France", flag: "🇫🇷" },
+  PL: {
+    name: "Premier League",
+    country: "England",
+    flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+    logo: "https://crests.football-data.org/PL.png",
+    color: "#3d195b",
+    accent: "#00ff85",
+  },
+  PD: {
+    name: "La Liga",
+    country: "Spain",
+    flag: "🇪🇸",
+    logo: "https://crests.football-data.org/PD.png",
+    color: "#ee8707",
+    accent: "#fff",
+  },
+  SA: {
+    name: "Serie A",
+    country: "Italy",
+    flag: "🇮🇹",
+    logo: "https://crests.football-data.org/SA.png",
+    color: "#024494",
+    accent: "#fff",
+  },
+  BL1: {
+    name: "Bundesliga",
+    country: "Germany",
+    flag: "🇩🇪",
+    logo: "https://crests.football-data.org/BL1.png",
+    color: "#d3010c",
+    accent: "#fff",
+  },
+  FL1: {
+    name: "Ligue 1",
+    country: "France",
+    flag: "🇫🇷",
+    logo: "https://crests.football-data.org/FL1.png",
+    color: "#091c3e",
+    accent: "#dba111",
+  },
 };
 
-export const LEAGUE_IDS = [39, 140, 135, 78, 61];
+export const LEAGUE_CODES = ["PL", "PD", "SA", "BL1", "FL1"];
 
-async function apiFetch(path) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT);
+let lastCallTime = 0;
+
+function wait(ms) {
+  return new Promise((res) => setTimeout(res, ms));
+}
+
+function lsGet(key) {
   try {
-    const res = await fetch(`${BASE_URL}${path}`, {
-      headers: { "x-apisports-key": API_KEY },
-      signal: controller.signal,
-    });
-    clearTimeout(timer);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-    const remaining = res.headers.get("x-ratelimit-requests-remaining");
-    const limit = res.headers.get("x-ratelimit-requests-limit");
-    if (remaining !== null) {
-      window.dispatchEvent(
-        new CustomEvent("bscore:quota", {
-          detail: {
-            used: (parseInt(limit) || 100) - (parseInt(remaining) || 0),
-            limit: parseInt(limit) || 100,
-          },
-        }),
-      );
-    }
-
-    const json = await res.json();
-    if (json.errors && Object.keys(json.errors).length) {
-      console.warn("[API] error response:", json.errors);
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const { data, ts } = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL) {
+      localStorage.removeItem(key);
       return null;
     }
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+function lsSet(key, data) {
+  try {
+    localStorage.setItem(key, JSON.stringify({ data, ts: Date.now() }));
+  } catch {}
+}
+
+async function call(path) {
+  const cached = lsGet(path);
+  if (cached) return cached;
+
+  const since = Date.now() - lastCallTime;
+  if (since < RATE_DELAY) await wait(RATE_DELAY - since);
+  lastCallTime = Date.now();
+
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 10000);
+  try {
+    const isMatch = path.startsWith("/matches/");
+    const r = await fetch(`${BASE}${path}`, {
+      headers: {
+        "X-Auth-Token": KEY,
+        ...(isMatch
+          ? {
+              "X-Unfold-Goals": "true",
+              "X-Unfold-Bookings": "true",
+              "X-Unfold-Lineups": "true",
+              "X-Unfold-Subs": "true",
+            }
+          : {}),
+      },
+      signal: ctrl.signal,
+    });
+    clearTimeout(t);
+
+    if (r.status === 429) {
+      console.warn("[API] 429 rate limit hit — data will load after cooldown");
+      return null;
+    }
+    if (!r.ok) {
+      console.warn(`[API] ${r.status} ${path}`);
+      return null;
+    }
+
+    const json = await r.json();
+    lsSet(path, json);
     return json;
-  } catch (err) {
-    clearTimeout(timer);
-    console.warn("[API] fetch failed:", path, err.message);
+  } catch (e) {
+    clearTimeout(t);
+    console.warn("[API] fetch failed:", path, e.message);
     return null;
   }
 }
 
-export async function fetchFixturesByDate(date) {
-  const data = await apiFetch(`/fixtures?date=${date}&timezone=Europe/London`);
-  if (!data || !Array.isArray(data.response)) return null;
-  return data.response.filter((f) => LEAGUES[f.league.id]);
+export async function fetchStandings(code) {
+  const d = await call(`/competitions/${code}/standings`);
+  if (!d) return null;
+  return d.standings?.find((s) => s.type === "TOTAL")?.table || null;
 }
 
-export async function fetchLiveFixtures() {
-  const ids = LEAGUE_IDS.join("-");
-  const data = await apiFetch(`/fixtures?live=${ids}`);
-  if (!data || !Array.isArray(data.response)) return null;
-  return data.response;
+export async function fetchMatches(code) {
+  const d = await call(`/competitions/${code}/matches?status=FINISHED`);
+  return d?.matches || null;
 }
 
-/**
- * League standings table.
- * @param {number} leagueId
- */
-export async function fetchStandings(leagueId) {
-  const data = await apiFetch(`/standings?league=${leagueId}&season=${SEASON}`);
-  try {
-    return data.response[0].league.standings[0];
-  } catch (_) {
-    return null;
-  }
+export async function fetchScorers(code) {
+  const d = await call(`/competitions/${code}/scorers?limit=20`);
+  return d?.scorers || null;
 }
 
-/**
- * Recent results (last 10) for a league.
- * @param {number} leagueId
- */
-export async function fetchLastResults(leagueId) {
-  const data = await apiFetch(
-    `/fixtures?league=${leagueId}&season=${SEASON}&last=10&status=FT`,
+export async function fetchMatch(matchId) {
+  return await call(`/matches/${matchId}`);
+}
+
+export async function fetchTeamMatches(teamId, code) {
+  const d = await call(
+    `/teams/${teamId}/matches?competitions=${code}&status=FINISHED&limit=20`,
   );
-  if (!data || !Array.isArray(data.response)) return null;
-  return data.response;
+  return d?.matches || null;
 }
 
-/**
- * Next fixtures (next 10) for a league.
- * @param {number} leagueId
- */
-export async function fetchNextFixtures(leagueId) {
-  const data = await apiFetch(
-    `/fixtures?league=${leagueId}&season=${SEASON}&next=10`,
-  );
-  if (!data || !Array.isArray(data.response)) return null;
-  return data.response;
-}
-
-/**
- * Team info + squad.
- * @param {number} teamId
- */
 export async function fetchTeam(teamId) {
-  const data = await apiFetch(`/teams?id=${teamId}`);
+  return await call(`/teams/${teamId}`);
+}
+
+export async function fetchTeamInfo(teamId) {
+  return fetchTeam(teamId);
+}
+
+export function clearCache() {
   try {
-    return data.response[0];
-  } catch (_) {
-    return null;
-  }
-}
-
-/**
- * Top scorers for a league.
- * @param {number} leagueId
- */
-export async function fetchTopScorers(leagueId) {
-  const data = await apiFetch(
-    `/players/topscorers?league=${leagueId}&season=${SEASON}`,
-  );
-  if (!data || !Array.isArray(data.response)) return null;
-  return data.response;
-}
-
-export function getDemoFixtures(date) {
-  const mk = (id, lgId, home, away, hg, ag, status, elapsed) => ({
-    fixture: {
-      id,
-      date: `${date}T20:00:00+00:00`,
-      status: { short: status, elapsed: elapsed || null },
-    },
-    league: {
-      id: lgId,
-      name: LEAGUES[lgId].name,
-      country: LEAGUES[lgId].country,
-      logo: "",
-      flag: "",
-    },
-    teams: {
-      home: { id: id * 10, name: home, logo: "" },
-      away: { id: id * 10 + 1, name: away, logo: "" },
-    },
-    goals: { home: hg, away: ag },
-  });
-  return [
-    mk(1, 39, "Arsenal", "Chelsea", 2, 1, "FT", 90),
-    mk(2, 39, "Liverpool", "Man City", 1, 1, "FT", 90),
-    mk(3, 39, "Newcastle", "Aston Villa", null, null, "NS", null),
-    mk(4, 140, "Real Madrid", "Barcelona", 2, 1, "FT", 90),
-    mk(5, 140, "Atletico Madrid", "Sevilla", null, null, "NS", null),
-    mk(6, 135, "Inter Milan", "Juventus", 1, 0, "FT", 90),
-    mk(7, 135, "AC Milan", "Napoli", 2, 2, "FT", 90),
-    mk(8, 78, "Bayern Munich", "Dortmund", 3, 1, "1H", 38),
-    mk(9, 78, "Leverkusen", "RB Leipzig", null, null, "NS", null),
-    mk(10, 61, "PSG", "Marseille", 4, 1, "FT", 90),
-    mk(11, 61, "Monaco", "Lyon", null, null, "2H", 67),
-  ];
+    Object.keys(localStorage)
+      .filter(
+        (k) =>
+          k.startsWith("/competitions") ||
+          k.startsWith("/matches") ||
+          k.startsWith("/teams"),
+      )
+      .forEach((k) => localStorage.removeItem(k));
+  } catch {}
 }

@@ -4,66 +4,83 @@
   position: sticky;
   top: 0;
   z-index: 300;
-  background: rgba(v.$bg-1, 0.97);
-  border-bottom: 1px solid v.$border;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--border);
   backdrop-filter: blur(12px);
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease;
+  box-shadow: var(--shadow);
 
   &__inner {
     display: flex;
     align-items: center;
-    height: 56px;
-    gap: v.$space-lg;
+    height: 58px;
+    gap: 20px;
   }
 
   &__logo {
     font-family: v.$font-head;
-    font-size: 26px;
+    font-size: 24px;
     letter-spacing: 2px;
-    color: v.$text-1;
+    color: var(--text-1);
     flex-shrink: 0;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     span {
-      color: v.$accent;
+      color: var(--accent);
+    }
+    &-img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      border-radius: 6px;
     }
   }
 
   &__nav {
     display: flex;
     gap: 2px;
-    @media (max-width: v.$bp-md) {
+    overflow-x: auto;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    @media (max-width: v.$bp-lg) {
       display: none;
     }
   }
 
   &__link {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 5px 13px;
+    padding: 5px 12px;
     border-radius: v.$radius-sm;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
-    color: v.$text-2;
-    transition: all v.$t-fast;
+    color: var(--text-2);
+    transition: all v.$t;
+    white-space: nowrap;
     cursor: pointer;
+    flex-shrink: 0;
     &:hover,
     &.active {
-      color: v.$text-1;
-      background: v.$bg-4;
+      color: var(--text-1);
+      background: var(--bg-3);
     }
   }
 
   &__right {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     margin-left: auto;
   }
 
   &__quota {
     font-size: 11px;
-    color: v.$text-3;
-    border: 1px solid v.$border;
+    color: var(--text-3);
+    border: 1px solid var(--border);
     border-radius: v.$radius-sm;
     padding: 3px 9px;
     white-space: nowrap;
@@ -72,14 +89,54 @@
     }
   }
 
+  &__theme-toggle {
+    width: 36px;
+    height: 36px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: v.$radius-sm;
+    color: var(--text-2);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all v.$t;
+    flex-shrink: 0;
+    &:hover {
+      background: var(--bg-4);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+  }
+
+  &__refresh {
+    width: 36px;
+    height: 36px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: v.$radius-sm;
+    color: var(--text-2);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all v.$t;
+    flex-shrink: 0;
+    &:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      transform: rotate(180deg);
+    }
+  }
+
   &__burger {
     display: none;
-    background: none;
-    border: none;
     font-size: 20px;
-    color: v.$text-2;
+    color: var(--text-2);
     padding: 4px;
-    @media (max-width: v.$bp-md) {
+    @media (max-width: v.$bp-lg) {
       display: block;
     }
   }
@@ -87,18 +144,10 @@
   &__drawer {
     display: none;
     flex-direction: column;
-    background: v.$bg-2;
-    border-top: 1px solid v.$border;
-    padding: v.$space-sm 0;
-
+    background: var(--bg-2);
+    border-top: 1px solid var(--border);
     &.open {
       display: flex;
-    }
-
-    @media (max-width: v.$bp-md) {
-      &.open {
-        display: flex;
-      }
     }
   }
 
@@ -106,15 +155,19 @@
     padding: 12px 20px;
     font-size: 14px;
     font-weight: 500;
-    color: v.$text-2;
+    color: var(--text-2);
     cursor: pointer;
-    transition: all v.$t-fast;
+    transition: all v.$t;
+    border-bottom: 1px solid var(--border);
+    &:last-child {
+      border-bottom: none;
+    }
     &:hover {
-      color: v.$text-1;
-      background: v.$bg-3;
+      color: var(--text-1);
+      background: var(--bg-3);
     }
     &.active {
-      color: v.$accent;
+      color: var(--accent);
     }
   }
 }

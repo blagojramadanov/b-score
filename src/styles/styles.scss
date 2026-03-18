@@ -1,10 +1,9 @@
 @use "./global";
 @use "./navbar";
 @use "./footer";
-
 @use "./home";
-@use "./leagues";
-@use "./live";
-@use "./table";
+@use "./league";
+@use "./match";
 @use "./team";
 @use "./about";
+@use "./players";

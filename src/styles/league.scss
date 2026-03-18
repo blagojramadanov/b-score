@@ -1,0 +1,53 @@
+@use "./variables" as v;
+
+.league-page {
+  padding: 32px 0;
+}
+
+.league-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+  &__flag {
+    font-size: 40px;
+  }
+  &__name {
+    font-family: v.$font-head;
+    font-size: clamp(28px, 4vw, 44px);
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+  &__country {
+    font-size: 12px;
+    color: var(--text-3);
+    margin-top: 4px;
+    display: block;
+  }
+}
+
+.league-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+}
+
+.ltab {
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-3);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all v.$t;
+  &:hover {
+    color: var(--text-2);
+  }
+  &.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+}
